@@ -1,4 +1,4 @@
-module DeviseCrowdAuthenticatable
+module DeviseCrowd
 
   class Logger
     def self.send(message, logger = Rails.logger)

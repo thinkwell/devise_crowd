@@ -14,11 +14,11 @@ module Devise::Strategies
       resource = mapping.to.find_for_crowd_authentication(authentication_hash)
       if validate(resource)
         return if halted?
-        DeviseCrowdAuthenticatable::Logger.send("authenticated!")
+        DeviseCrowd::Logger.send("authenticated!")
         resource.after_crowd_authentication
         success!(resource)
       else
-        DeviseCrowdAuthenticatable::Logger.send("not authenticated!")
+        DeviseCrowd::Logger.send("not authenticated!")
         return if halted?
         fail(:crowd_unknown_user)
       end
