@@ -20,5 +20,7 @@ Gem::Specification.new do |s|
 
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
-  # s.add_runtime_dependency "rest-client"
+  s.add_runtime_dependency %q<simple_crowd>
+  s.add_runtime_dependency %q<activesupport>
+  s.add_runtime_dependency %q<devise>
 end
