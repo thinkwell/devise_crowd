@@ -15,6 +15,10 @@ module Devise::Strategies
       if validate(resource)
         return if halted?
         DeviseCrowd::Logger.send("authenticated!")
+        if store?
+          DeviseCrowd.session(env['warden'], scope)['last_auth'] = Time.now
+          DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
+        end
         resource.after_crowd_authentication
         success!(resource)
       else
@@ -24,11 +28,9 @@ module Devise::Strategies
       end
     end
 
-    # Store user information in a session and
-    # HACK: Use :crowd instead of true so that the after_authentication hook
-    # can set the last_crowd_auth timeout
+    # Store user information in a session if crowd_auth_every is set
     def store?
-      mapping.to.crowd_auth_every.to_i > 0 ? :crowd : false
+      mapping.to.crowd_auth_every.to_i > 0
     end
 
 

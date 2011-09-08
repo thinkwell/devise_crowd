@@ -1,3 +1,4 @@
+require 'devise_crowd/session'
 require 'devise_crowd/strategy'
 require 'devise_crowd/hooks'
 

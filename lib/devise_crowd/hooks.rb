@@ -2,12 +2,12 @@ Warden::Manager.after_set_user do |record, warden, options|
   scope = options[:scope]
 
   if record && record.respond_to?(:needs_crowd_auth?) && warden.authenticated?(scope) && options[:store] != false
-    last_auth_at = warden.session(scope)['last_crowd_auth']
+    last_auth = DeviseCrowd.session(warden, scope)['last_auth']
 
-    if last_auth_at && record.needs_crowd_auth?(last_auth_at)
+    if last_auth && record.needs_crowd_auth?(last_auth)
       path_checker = Devise::PathChecker.new(warden.env, scope)
       unless path_checker.signing_out?
-        DeviseCrowd::Logger.send "Re-authorization required. Last authorization was at #{last_auth_at}."
+        DeviseCrowd::Logger.send "Re-authorization required. Last authorization was at #{last_auth}."
         warden.logout(scope)
       end
     end
@@ -16,10 +16,7 @@ Warden::Manager.after_set_user do |record, warden, options|
 end
 
 
-Warden::Manager.after_authentication do |record, warden, options|
-  scope = options[:scope]
-  if options[:store] == :crowd && record.class.crowd_auth_every.to_i > 0
-    DeviseCrowd::Logger.send "Caching crowd authorization.  Next authorization at #{Time.now + record.class.crowd_auth_every}."
-    warden.session(scope)['last_crowd_auth'] = Time.now
-  end
+Warden::Manager.before_logout do |record, warden, options|
+  DeviseCrowd.remove_session(warden, options[:scope])
+  DeviseCrowd::Logger.send "Removed cached crowd authorization."
 end
