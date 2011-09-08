@@ -2,14 +2,23 @@ Warden::Manager.after_set_user do |record, warden, options|
   scope = options[:scope]
 
   if record && record.respond_to?(:needs_crowd_auth?) && warden.authenticated?(scope) && options[:store] != false
-    last_auth = DeviseCrowd.session(warden, scope)['last_auth']
-
-    if last_auth && record.needs_crowd_auth?(last_auth)
+    logout = lambda do |msg|
       path_checker = Devise::PathChecker.new(warden.env, scope)
       unless path_checker.signing_out?
-        DeviseCrowd::Logger.send "Re-authorization required. Last authorization was at #{last_auth}."
+        DeviseCrowd::Logger.send msg if msg
         warden.logout(scope)
       end
+    end
+
+    crowd_session = DeviseCrowd.session(warden, scope)
+    crowd_token = warden.params[record.class.crowd_param_tokenkey] || warden.request.cookies[record.class.crowd_cookie_tokenkey]
+
+    if crowd_session['last_token'] != crowd_token
+      logout.call "Re-authorization required.  Crowd token does not match cached token."
+    elsif crowd_session['last_auth'] && record.needs_crowd_auth?(crowd_session['last_auth'])
+      logout.call "Re-authorization required.  Last authorization was at #{crowd_session['last_auth']}."
+    elsif !crowd_session['last_auth']
+      logout.call "Re-authorization required.  Unable to determine last authorization time."
     end
   end
 

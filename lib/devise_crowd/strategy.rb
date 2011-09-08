@@ -16,7 +16,9 @@ module Devise::Strategies
         return if halted?
         DeviseCrowd::Logger.send("authenticated!")
         if store?
-          DeviseCrowd.session(env['warden'], scope)['last_auth'] = Time.now
+          crowd_session = DeviseCrowd.session(env['warden'], scope)
+          crowd_session['last_auth'] = Time.now
+          crowd_session['last_token'] = crowd_tokenkey
           DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
         end
         resource.after_crowd_authentication
