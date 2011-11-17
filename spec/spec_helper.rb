@@ -1,3 +1,4 @@
+ENV["RAILS_ENV"] = "test"
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'bundler'
@@ -5,6 +6,7 @@ Bundler.setup(:default, :test)
 
 require 'rspec'
 require 'rr'
+require 'action_controller'
 require 'mongoid'
 require 'devise'
 require 'devise_crowd'
