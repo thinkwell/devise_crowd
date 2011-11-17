@@ -17,7 +17,7 @@ Warden::Manager.after_set_user do |record, warden, options|
       logout.call "Re-authorization required.  Crowd token does not match cached token."
     elsif crowd_session['last_auth'] && record.needs_crowd_auth?(crowd_session['last_auth'])
       logout.call "Re-authorization required.  Last authorization was at #{crowd_session['last_auth']}."
-    elsif !crowd_session['last_auth']
+    elsif crowd_token && !crowd_session['last_auth']
       logout.call "Re-authorization required.  Unable to determine last authorization time."
     end
   end
