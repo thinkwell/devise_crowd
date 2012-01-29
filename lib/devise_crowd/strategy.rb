@@ -8,7 +8,7 @@ module Devise::Strategies
 
     def authenticate!
       # Do the crowd lookup and insert into authentication_hash
-      with_authentication_hash(crowd_auth_hash)
+      with_authentication_hash(:crowd_auth, crowd_auth_hash)
       return fail(:crowd_invalid) unless authentication_hash.length > 0
 
       resource = mapping.to.find_for_crowd_authentication(authentication_hash)
