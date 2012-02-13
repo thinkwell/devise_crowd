@@ -14,7 +14,7 @@ module Devise::Models
     end
 
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_auth_every, :crowd_cookie_tokenkey, :crowd_param_tokenkey, :crowd_username_field)
+      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_auth_every, :crowd_cookie_tokenkey, :crowd_param_tokenkey, :crowd_username_field, :crowd_allow_forgery_protection)
 
       def crowd_enabled?(strategy)
         crowd_enabled.is_a?(Array) ?

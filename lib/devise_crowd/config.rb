@@ -28,4 +28,7 @@ module Devise
   mattr_accessor :crowd_logger
   @@crowd_logger = true
 
+  mattr_accessor :crowd_allow_forgery_protection
+  @@crowd_allow_forgery_protection = true
+
 end

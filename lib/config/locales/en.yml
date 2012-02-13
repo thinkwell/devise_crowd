@@ -3,3 +3,4 @@ en:
     failure:
       crowd_unknown_user: 'Unknown Crowd user.'
       crowd_invalid: 'Invalid Crowd token.'
+      crowd_unverified_request: 'Invalid authenticity token.'

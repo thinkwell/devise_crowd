@@ -14,6 +14,10 @@ module Devise::Strategies
       resource = mapping.to.find_for_crowd_authentication(authentication_hash)
       if validate(resource)
         return if halted?
+        if crowd_allow_forgery_protection? && crowd_unverified_request?
+          DeviseCrowd::Logger.send("Can't verify CSRF token authenticity.")
+          return fail(:crowd_unverified_request)
+        end
         DeviseCrowd::Logger.send("authenticated!")
         if store?
           crowd_session = DeviseCrowd.session(env['warden'], scope)
@@ -56,6 +60,14 @@ module Devise::Strategies
 
     def crowd_cookie_tokenkey
       request.cookies[mapping.to.crowd_cookie_tokenkey]
+    end
+
+    def crowd_allow_forgery_protection?
+      !!mapping.to.crowd_allow_forgery_protection
+    end
+
+    def crowd_unverified_request?
+      !!request.env['crowd.unverified_request']
     end
 
     def crowd_param_tokenkey
