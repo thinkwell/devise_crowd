@@ -1,0 +1,5 @@
+en:
+  devise:
+    failure:
+      crowd_unknown_user: 'Unknown Crowd user.'
+      crowd_invalid: 'Invalid Crowd token.'

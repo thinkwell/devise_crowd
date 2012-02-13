@@ -10,3 +10,5 @@ Devise.add_module(:crowd_authenticatable,
   :strategy => true,
   :model => 'devise_crowd/model'
 )
+
+I18n.load_path << File.join(File.dirname(__FILE__), "config", "locales", "en.yml")
