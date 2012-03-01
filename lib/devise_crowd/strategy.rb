@@ -3,7 +3,7 @@ require 'devise/strategies/authenticatable'
 module Devise::Strategies
   class CrowdAuthenticatable < Authenticatable
     def valid?
-      valid_for_crowd_auth?
+      valid_for_crowd_token_auth?
     end
 
     def authenticate!
@@ -42,8 +42,13 @@ module Devise::Strategies
 
   private
 
-    def valid_for_crowd_auth?
+    def valid_for_crowd_token_auth?
       crowd_enabled? && has_crowd_tokenkey?
+    end
+
+    def valid_for_crowd_user_auth?
+      # TODO: Implement User Auth
+      #crowd_enabled? && valid_params?
     end
 
     def crowd_enabled?
@@ -77,7 +82,18 @@ module Devise::Strategies
     def crowd_auth_hash
       # TODO: Authenticate the crowd token and return the crowd username
       # in a hash:
-      {mapping.to.crowd_username_field => 'blt04'}
+
+      valid_token = has_crowd_tokenkey? && crowd_client.is_valid_user_token?(crowd_tokenkey)
+      user_for_token = valid_token ? crowd_client.find_username_by_token(crowd_tokenkey) : nil
+
+      user_for_token ? {mapping.to.crowd_username_field => user_for_token} : {}
+    end
+
+    def crowd_client
+      @crowd_client ||= SimpleCrowd::Client.new(
+          {:service_url => mapping.to.crowd_service_url,
+           :app_name => mapping.to.crowd_app_name,
+           :app_password => mapping.to.crowd_app_password})
     end
 
   end
