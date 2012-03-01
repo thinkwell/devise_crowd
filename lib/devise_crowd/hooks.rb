@@ -3,11 +3,8 @@ Warden::Manager.after_set_user do |record, warden, options|
 
   if record && record.respond_to?(:needs_crowd_auth?) && warden.authenticated?(scope) && options[:store] != false
     logout = lambda do |msg|
-      path_checker = Devise::PathChecker.new(warden.env, scope)
-      unless path_checker.signing_out?
-        DeviseCrowd::Logger.send msg if msg
-        warden.logout(scope)
-      end
+      DeviseCrowd::Logger.send msg if msg
+      warden.logout(scope)
     end
 
     crowd_session = DeviseCrowd.session(warden, scope)

@@ -22,5 +22,5 @@ Gem::Specification.new do |s|
   # s.add_development_dependency "rspec"
   s.add_runtime_dependency %q<simple_crowd>
   s.add_runtime_dependency %q<activesupport>
-  s.add_runtime_dependency(%q<devise>, [">= 2.0.0"])
+  s.add_runtime_dependency(%q<devise>, [">= 2.0.4"])
 end
