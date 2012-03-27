@@ -3,7 +3,7 @@ require 'devise/strategies/authenticatable'
 module Devise::Strategies
   class CrowdAuthenticatable < Authenticatable
     def valid?
-      valid_for_crowd_token_auth?
+      crowd_enabled? && (valid_for_crowd_token_auth? || valid_for_crowd_user_auth?)
     end
 
     def authenticate!
@@ -43,12 +43,11 @@ module Devise::Strategies
   private
 
     def valid_for_crowd_token_auth?
-      crowd_enabled? && has_crowd_tokenkey?
+      has_crowd_tokenkey?
     end
 
     def valid_for_crowd_user_auth?
-      # TODO: Implement User Auth
-      #crowd_enabled? && valid_params?
+      !crowd_param_user.blank? && !crowd_param_pass.blank?
     end
 
     def crowd_enabled?
@@ -67,6 +66,14 @@ module Devise::Strategies
       request.cookies[mapping.to.crowd_cookie_tokenkey]
     end
 
+    def crowd_param_user
+      params[mapping.to.crowd_username]
+    end
+
+    def crowd_param_pass
+      params[mapping.to.crowd_param_pass]
+    end
+
     def crowd_allow_forgery_protection?
       !!mapping.to.crowd_allow_forgery_protection
     end
@@ -80,13 +87,17 @@ module Devise::Strategies
     end
 
     def crowd_auth_hash
-      # TODO: Authenticate the crowd token and return the crowd username
-      # in a hash:
+      user_for_hash = nil
 
-      valid_token = has_crowd_tokenkey? && crowd_client.is_valid_user_token?(crowd_tokenkey)
-      user_for_token = valid_token ? crowd_client.find_username_by_token(crowd_tokenkey) : nil
+      if valid_for_crowd_token_auth?
+        valid_token = crowd_client.is_valid_user_token?(crowd_tokenkey)
+        user_for_hash = valid_token ? crowd_client.find_username_by_token(crowd_tokenkey) : nil
+      elsif valid_for_crowd_user_auth?
+        # TODO: Take user params instead of token
+        user_for_hash = nil
+      end
 
-      user_for_token ? {mapping.to.crowd_username_field => user_for_token} : {}
+      user_for_hash ? {mapping.to.crowd_username_field => user_for_hash} : {}
     end
 
     def crowd_client
