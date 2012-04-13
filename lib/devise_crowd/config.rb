@@ -25,9 +25,6 @@ module Devise
   mattr_accessor :crowd_username_field
   @@crowd_username_field = "crowd_username"
 
-  mattr_accessor :crowd_param_password
-  @@crowd_param_password = "password"
-
   mattr_accessor :crowd_logger
   @@crowd_logger = true
 
