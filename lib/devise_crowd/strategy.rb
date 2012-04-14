@@ -19,12 +19,7 @@ module Devise::Strategies
           return fail(:crowd_unverified_request)
         end
         DeviseCrowd::Logger.send("authenticated!")
-        if store?
-          crowd_session = DeviseCrowd.session(env['warden'], scope)
-          crowd_session['last_auth'] = Time.now
-          crowd_session['last_token'] = crowd_tokenkey
-          DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
-        end
+        cache_authentication if store?
         resource.after_crowd_authentication
         success!(resource)
       else
@@ -41,6 +36,10 @@ module Devise::Strategies
 
 
   private
+
+    def warden
+      env['warden']
+    end
 
     def valid_for_crowd_token_auth?
       crowd_enabled? && has_crowd_tokenkey?
@@ -91,6 +90,13 @@ module Devise::Strategies
 
     def crowd_client
       @crowd_client ||= mapping.to.crowd_client
+    end
+
+    def cache_authentication
+      crowd_session = DeviseCrowd.session(warden, scope)
+      crowd_session['last_auth'] = Time.now
+      crowd_session['last_token'] = crowd_tokenkey
+      DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
     end
 
   end
