@@ -8,8 +8,13 @@ module Devise::Strategies
 
     def authenticate!
       # Do the crowd lookup and insert into authentication_hash
+      crowd_auth_hash = crowd_auth_hash()
       with_authentication_hash(:crowd_auth, crowd_auth_hash)
-      return fail(:crowd_invalid) unless authentication_hash.length > 0
+      unless authentication_hash.length > 0
+        DeviseCrowd::Logger.send "not authenticated!"
+        DeviseCrowd::Logger.send "try using string authentication_keys (\"#{mapping.to.crowd_username_field}\") instead of symbols" if crowd_auth_hash.has_key?(mapping.to.crowd_username_field.to_s) && authentication_keys.has_key?(mapping.to.crowd_username_field.to_sym)
+        return fail(:crowd_invalid)
+      end
 
       resource = mapping.to.find_for_crowd_authentication(authentication_hash)
       if validate(resource)
@@ -79,13 +84,21 @@ module Devise::Strategies
     end
 
     def crowd_auth_hash
-      # TODO: Authenticate the crowd token and return the crowd username
-      # in a hash:
+      auth_hash = {}
+      if has_crowd_tokenkey?
+        if crowd_client.is_valid_user_token?(crowd_tokenkey)
+          username = crowd_client.find_username_by_token(crowd_tokenkey)
+          if username
+            auth_hash[mapping.to.crowd_username_field.to_s] = username
+          else
+            DeviseCrowd::Logger.send("cannot find username for token key")
+          end
+        else
+          DeviseCrowd::Logger.send("invalid token key")
+        end
+      end
 
-      valid_token = has_crowd_tokenkey? && crowd_client.is_valid_user_token?(crowd_tokenkey)
-      user_for_token = valid_token ? crowd_client.find_username_by_token(crowd_tokenkey) : nil
-
-      user_for_token ? {mapping.to.crowd_username_field => user_for_token} : {}
+      auth_hash
     end
 
     def crowd_client
