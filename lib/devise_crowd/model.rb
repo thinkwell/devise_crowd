@@ -16,6 +16,15 @@ module Devise::Models
     module ClassMethods
       Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_auth_every, :crowd_cookie_tokenkey, :crowd_param_tokenkey, :crowd_username_field, :crowd_allow_forgery_protection)
 
+      def crowd_client
+        SimpleCrowd::Client.new({
+          :service_url => self.crowd_service_url,
+          :app_name => self.crowd_app_name,
+          :app_password => self.crowd_app_password,
+          :cache_store => Rails.cache,
+        })
+      end
+
       def crowd_enabled?(strategy)
         crowd_enabled.is_a?(Array) ?
           crowd_enabled.include?(strategy) : crowd_enabled

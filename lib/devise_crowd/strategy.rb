@@ -90,10 +90,7 @@ module Devise::Strategies
     end
 
     def crowd_client
-      @crowd_client ||= SimpleCrowd::Client.new(
-          {:service_url => mapping.to.crowd_service_url,
-           :app_name => mapping.to.crowd_app_name,
-           :app_password => mapping.to.crowd_app_password})
+      @crowd_client ||= mapping.to.crowd_client
     end
 
   end
