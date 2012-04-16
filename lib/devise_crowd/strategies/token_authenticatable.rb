@@ -1,7 +1,7 @@
 require 'devise/strategies/authenticatable'
 
 module Devise::Strategies
-  class CrowdAuthenticatable < Authenticatable
+  class CrowdTokenAuthenticatable < Authenticatable
     def valid?
       valid_for_crowd_token_auth?
     end
@@ -50,11 +50,6 @@ module Devise::Strategies
       crowd_enabled? && has_crowd_tokenkey?
     end
 
-    def valid_for_crowd_user_auth?
-      # TODO: Implement User Auth
-      #crowd_enabled? && valid_params?
-    end
-
     def crowd_enabled?
       mapping.to.crowd_enabled?(authenticatable_name)
     end
@@ -64,11 +59,11 @@ module Devise::Strategies
     end
 
     def crowd_tokenkey
-      crowd_param_tokenkey || crowd_cookie_tokenkey
+      crowd_token_param || crowd_token_cookie
     end
 
-    def crowd_cookie_tokenkey
-      request.cookies[mapping.to.crowd_cookie_tokenkey]
+    def crowd_token_cookie
+      request.cookies[mapping.to.crowd_token_cookie]
     end
 
     def crowd_allow_forgery_protection?
@@ -79,8 +74,8 @@ module Devise::Strategies
       !!request.env['crowd.unverified_request']
     end
 
-    def crowd_param_tokenkey
-      params[mapping.to.crowd_param_tokenkey]
+    def crowd_token_param
+      params[mapping.to.crowd_token_param]
     end
 
     def crowd_auth_hash
@@ -115,4 +110,4 @@ module Devise::Strategies
   end
 end
 
-Warden::Strategies.add(:crowd_authenticatable, Devise::Strategies::CrowdAuthenticatable)
+Warden::Strategies.add(:crowd_token_authenticatable, Devise::Strategies::CrowdTokenAuthenticatable)

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Devise::Models
-  describe CrowdAuthenticatable do
+  describe CrowdCommon do
 
 
     before(:each) do
@@ -15,10 +15,9 @@ module Devise::Models
       @model_class.should respond_to('crowd_service_url')
       @model_class.should respond_to('crowd_app_name')
       @model_class.should respond_to('crowd_app_password')
-      @model_class.should respond_to('crowd_auth_every')
-      @model_class.should respond_to('crowd_cookie_tokenkey')
-      @model_class.should respond_to('crowd_param_tokenkey')
       @model_class.should respond_to('crowd_username_field')
+      @model_class.should respond_to('crowd_auth_every')
+      @model_class.should respond_to('crowd_allow_forgery_protection')
     end
 
 

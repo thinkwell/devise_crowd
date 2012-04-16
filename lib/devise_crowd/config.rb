@@ -16,11 +16,11 @@ module Devise
   mattr_accessor :crowd_auth_every
   @@crowd_auth_every = 10.minutes
 
-  mattr_accessor :crowd_cookie_tokenkey
-  @@crowd_cookie_tokenkey = "crowd.token_key"
+  mattr_accessor :crowd_token_cookie
+  @@crowd_token_cookie = "crowd.token_key"
 
-  mattr_accessor :crowd_param_tokenkey
-  @@crowd_param_tokenkey = "crowd.token_key"
+  mattr_accessor :crowd_token_param
+  @@crowd_token_param = "crowd.token_key"
 
   mattr_accessor :crowd_username_field
   @@crowd_username_field = "crowd_username"

@@ -1,9 +1,8 @@
 require 'devise_crowd/session'
-require 'devise_crowd/strategy'
 require 'devise_crowd/hooks'
 
 module Devise::Models
-  module CrowdAuthenticatable
+  module CrowdCommon
     extend ActiveSupport::Concern
 
     def after_crowd_authentication
@@ -14,7 +13,7 @@ module Devise::Models
     end
 
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_auth_every, :crowd_cookie_tokenkey, :crowd_param_tokenkey, :crowd_username_field, :crowd_allow_forgery_protection)
+      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_username_field, :crowd_auth_every, :crowd_allow_forgery_protection)
 
       def crowd_client
         SimpleCrowd::Client.new({

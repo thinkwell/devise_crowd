@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Devise::Strategies
 
-  describe CrowdAuthenticatable do
+  describe CrowdTokenAuthenticatable do
 
     CROWD_USERNAME = 'gcostanza'
     CROWD_TOKEN = '1234567890abcdefghijklmno'
@@ -21,7 +21,7 @@ module Devise::Strategies
     def strategy(uri, cookies={})
       env = Rack::MockRequest.env_for(uri, 'HTTP_COOKIE'=>cookies.to_query)
       env['warden'] = warden_manager
-      CrowdAuthenticatable.new(env, :mock_user)
+      CrowdTokenAuthenticatable.new(env, :mock_user)
     end
 
     context "with a crowd token cookie" do
