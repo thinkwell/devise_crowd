@@ -29,12 +29,8 @@ module Devise::Models
           crowd_enabled.include?(strategy) : crowd_enabled
       end
 
-      # We assume this method already gets the sanitized values from the
-      # CrowdAuthenticatable strategy. If you are using this method on
-      # your own, be sure to sanitize the conditions hash to only include
-      # the proper fields.
-      def find_for_crowd_authentication(conditions)
-        find_for_authentication(conditions)
+      def find_for_crowd_username(username)
+        find_for_authentication({self.crowd_username_field => username})
       end
 
     end

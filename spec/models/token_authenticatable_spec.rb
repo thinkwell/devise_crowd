@@ -12,5 +12,9 @@ module Devise::Models
       @model_class.should respond_to('crowd_token_cookie')
       @model_class.should respond_to('crowd_token_param')
     end
+
+    it "adds instance methods to model" do
+      @model.should respond_to('after_crowd_token_authentication')
+    end
   end
 end

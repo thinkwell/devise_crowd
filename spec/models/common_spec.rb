@@ -23,7 +23,7 @@ module Devise::Models
 
     it "adds class methods to model class" do
       @model_class.should respond_to('crowd_enabled?')
-      @model_class.should respond_to('find_for_crowd_authentication')
+      @model_class.should respond_to('find_for_crowd_username')
     end
 
     it "adds instance methods to model" do

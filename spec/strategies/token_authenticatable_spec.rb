@@ -4,8 +4,8 @@ module Devise::Strategies
 
   describe CrowdTokenAuthenticatable do
 
-    CROWD_USERNAME = 'gcostanza'
-    CROWD_TOKEN = '1234567890abcdefghijklmno'
+    def crowd_username; 'gcostanza'; end
+    def crowd_token; '1234567890abcdefghijklmno'; end
 
     # TODO: This should not be needed.  This throws an exception including
     # Rails.application.routes.url_helpers the first time it is called.
@@ -26,7 +26,7 @@ module Devise::Strategies
 
     context "with a crowd token cookie" do
       before(:each) do
-        @strategy = strategy("http://example.com/foobar", 'crowd.token_key' => CROWD_TOKEN)
+        @strategy = strategy("http://example.com/foobar", 'crowd.token_key' => crowd_token)
       end
 
       it "is valid for crowd authentication" do
@@ -34,23 +34,23 @@ module Devise::Strategies
       end
 
       it "authenticates the crowd token" do
-        mock(@mock_crowd_client).is_valid_user_token?(CROWD_TOKEN) {true}
-        mock(@mock_crowd_client).find_username_by_token(CROWD_TOKEN) {CROWD_USERNAME}
-        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => CROWD_USERNAME}){@model}
+        mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
+        mock(@mock_crowd_client).find_username_by_token(crowd_token) {crowd_username}
+        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => crowd_username}){@model}
         #mock.proxy(@strategy).success!(@model)
         @strategy.authenticate!
         @strategy.result.should == :success
       end
 
       it "rejects an invalid crowd token" do
-        mock(@mock_crowd_client).is_valid_user_token?(CROWD_TOKEN) {false}
+        mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {false}
         @strategy.authenticate!
         @strategy.result.should == :failure
       end
 
       it "rejects an unknown crowd username" do
-        mock(@mock_crowd_client).is_valid_user_token?(CROWD_TOKEN) {true}
-        mock(@mock_crowd_client).find_username_by_token(CROWD_TOKEN) {'foobar'}
+        mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
+        mock(@mock_crowd_client).find_username_by_token(crowd_token) {'foobar'}
         mock(Devise::Mock::User).find_for_authentication({'crowd_username' => 'foobar'}){nil}
         @strategy.authenticate!
         @strategy.result.should == :failure
@@ -59,7 +59,7 @@ module Devise::Strategies
 
     context "with a crowd token param" do
       before(:each) do
-        @strategy = strategy("http://example.com/foobar?crowd.token_key=#{CROWD_TOKEN}")
+        @strategy = strategy("http://example.com/foobar?crowd.token_key=#{crowd_token}")
       end
 
       it "is valid for crowd authentication" do
