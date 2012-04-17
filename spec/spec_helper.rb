@@ -45,6 +45,6 @@ end
 def warden_manager
   mock_warden = OpenStruct.new
   mock_warden.session = mock_warden.raw_session = {}
-  mock_warden.warden_cookies = {}
+  mock_warden.cookies = {}
   mock_warden
 end

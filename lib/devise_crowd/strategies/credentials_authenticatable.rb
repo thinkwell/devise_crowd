@@ -20,7 +20,7 @@ module Devise::Strategies
       validate_crowd_username!(crowd_username) do |resource|
         cookie_info = DeviseCrowd.crowd_fetch { crowd_client.get_cookie_info }
         if cookie_info
-          warden.warden_cookies[mapping.to.crowd_token_key] = {
+          warden.cookies[mapping.to.crowd_token_key] = {
             :domain => cookie_info[:domain],
             :secure => cookie_info[:secure],
             :value => crowd_token,
