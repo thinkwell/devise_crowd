@@ -25,6 +25,11 @@ module Devise
   mattr_accessor :crowd_username_field
   @@crowd_username_field = "crowd_username"
 
+  # The name of the username parameter.  If nil (default), the
+  # first available authentication_keys key will be used.
+  mattr_accessor :crowd_username_param
+  @@crowd_username_param = nil
+
   mattr_accessor :crowd_logger
   @@crowd_logger = true
 
