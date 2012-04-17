@@ -47,18 +47,8 @@ module Devise::Strategies
       params_auth_hash.is_a?(Hash)
     end
 
-    def crowd_username_param
-      key = mapping.to.crowd_username_param
-      unless key
-        k1 = authentication_hash.keys
-        k2 = authentication_keys.is_a?(Hash) ? authentication_keys.keys : authentication_keys
-        key = (k1 & k2).first
-      end
-      key
-    end
-
     def authenticate_crowd_credentials
-      username = authentication_hash[crowd_username_param]
+      username = authentication_hash[mapping.to.crowd_username_key]
       token = crowd_client.authenticate_user(username, password) if username
 
       if token

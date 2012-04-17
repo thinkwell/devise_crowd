@@ -13,7 +13,7 @@ module Devise::Models
     end
 
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_username_field, :crowd_auth_every, :crowd_allow_forgery_protection)
+      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection)
 
       def crowd_client
         SimpleCrowd::Client.new({
@@ -29,8 +29,17 @@ module Devise::Models
           crowd_enabled.include?(strategy) : crowd_enabled
       end
 
+      def crowd_username_key_with_default
+        key = crowd_username_key_without_default
+        unless key
+          key = (authentication_keys.is_a?(Hash) ? authentication_keys.keys : authentication_keys).first
+        end
+        key
+      end
+      alias_method_chain :crowd_username_key, :default
+
       def find_for_crowd_username(username)
-        find_for_authentication({self.crowd_username_field => username})
+        find_for_authentication({self.crowd_username_key => username})
       end
 
     end

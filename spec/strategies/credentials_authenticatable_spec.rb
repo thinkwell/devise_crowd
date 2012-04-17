@@ -3,8 +3,8 @@ require 'spec_helper'
 module Devise::Strategies
   describe CrowdCredentialsAuthenticatable do
 
-    def crowd_username; 'gcostanza'; end
-    def crowd_password; 'vandelay industries'; end
+    def crowd_username; 'gcostanza@vandelayindustries.com'; end
+    def crowd_password; 'latex'; end
     def crowd_token; '1234567890abcdefghijklmno'; end
 
     before(:each) do
@@ -21,7 +21,7 @@ module Devise::Strategies
     context "with credentials" do
       before(:each) do
         @strategy = strategy("http://example.com/foobar", {
-          "mock_user[username]" => crowd_username,
+          "mock_user[email]" => crowd_username,
           "mock_user[password]" => crowd_password,
         })
       end
@@ -32,14 +32,14 @@ module Devise::Strategies
 
       it "authenticates the crowd credentials" do
         mock(@mock_crowd_client).authenticate_user(crowd_username, crowd_password) {crowd_token}
-        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => crowd_username}){@model}
+        mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
         @strategy.valid? && @strategy.authenticate!
         @strategy.result.should == :success
       end
 
       it "sets the crowd.token_key cookie" do
         mock(@mock_crowd_client).authenticate_user(crowd_username, crowd_password) {crowd_token}
-        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => crowd_username}){@model}
+        mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
         @strategy.valid? && @strategy.authenticate!
         @warden.warden_cookies['crowd.token_key'].should == crowd_token
       end

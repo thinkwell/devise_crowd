@@ -4,7 +4,7 @@ module Devise::Strategies
 
   describe CrowdTokenAuthenticatable do
 
-    def crowd_username; 'gcostanza'; end
+    def crowd_username; 'gcostanza@vandelayindustries.com'; end
     def crowd_token; '1234567890abcdefghijklmno'; end
 
     # TODO: This should not be needed.  This throws an exception including
@@ -36,7 +36,7 @@ module Devise::Strategies
       it "authenticates the crowd token" do
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
         mock(@mock_crowd_client).find_username_by_token(crowd_token) {crowd_username}
-        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => crowd_username}){@model}
+        mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
         #mock.proxy(@strategy).success!(@model)
         @strategy.authenticate!
         @strategy.result.should == :success
@@ -51,7 +51,7 @@ module Devise::Strategies
       it "rejects an unknown crowd username" do
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
         mock(@mock_crowd_client).find_username_by_token(crowd_token) {'foobar'}
-        mock(Devise::Mock::User).find_for_authentication({'crowd_username' => 'foobar'}){nil}
+        mock(Devise::Mock::User).find_for_authentication({:email => 'foobar'}){nil}
         @strategy.authenticate!
         @strategy.result.should == :failure
       end

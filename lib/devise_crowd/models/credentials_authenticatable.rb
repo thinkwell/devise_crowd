@@ -18,9 +18,5 @@ module Devise::Models
     def after_crowd_credentials_authentication
       after_crowd_authentication
     end
-
-    module ClassMethods
-      Devise::Models.config(self, :crowd_username_param)
-    end
   end
 end

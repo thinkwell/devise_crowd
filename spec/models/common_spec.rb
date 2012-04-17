@@ -15,7 +15,7 @@ module Devise::Models
       @model_class.should respond_to('crowd_service_url')
       @model_class.should respond_to('crowd_app_name')
       @model_class.should respond_to('crowd_app_password')
-      @model_class.should respond_to('crowd_username_field')
+      @model_class.should respond_to('crowd_username_key')
       @model_class.should respond_to('crowd_auth_every')
       @model_class.should respond_to('crowd_allow_forgery_protection')
     end
@@ -46,6 +46,19 @@ module Devise::Models
       it "returns true for a globally false configuration" do
         stub(Devise).crowd_enabled{false}
         @model_class.should_not be_crowd_enabled(:crowd)
+      end
+    end
+
+    describe '#crowd_username_key' do
+      it "returns the key set in config" do
+        mock(Devise).crowd_username_key.at_least(1) {:foobar}
+        @model_class.crowd_username_key.should == :foobar
+      end
+
+      it "returns the first authentication_keys key if no config is set" do
+        mock(Devise).crowd_username_key.at_least(1) {nil}
+        mock(Devise).authentication_keys.at_least(1) {[:foo, :bar]}
+        @model_class.crowd_username_key.should == :foo
       end
     end
 

@@ -22,13 +22,10 @@ module Devise
   mattr_accessor :crowd_token_param
   @@crowd_token_param = "crowd.token_key"
 
-  mattr_accessor :crowd_username_field
-  @@crowd_username_field = "crowd_username"
-
-  # The name of the username parameter.  If nil (default), the
-  # first available authentication_keys key will be used.
-  mattr_accessor :crowd_username_param
-  @@crowd_username_param = nil
+  # The name of the crowd username parameter/field.  If nil (default), the
+  # first authentication_keys key will be used (e.g. email).
+  mattr_accessor :crowd_username_key
+  @@crowd_username_key = nil
 
   mattr_accessor :crowd_logger
   @@crowd_logger = true
