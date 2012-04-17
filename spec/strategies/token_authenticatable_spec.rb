@@ -7,12 +7,6 @@ module Devise::Strategies
     def crowd_username; 'gcostanza@vandelayindustries.com'; end
     def crowd_token; '1234567890abcdefghijklmno'; end
 
-    # TODO: This should not be needed.  This throws an exception including
-    # Rails.application.routes.url_helpers the first time it is called.
-    before(:all) do
-      Devise.add_mapping(:mock_users, :class_name => Devise::Mock::User) rescue nil
-    end
-
     before(:each) do
       Devise.add_mapping(:mock_users, :class_name => Devise::Mock::User)
       @model = Devise::Mock::User.new(:id => 555)
