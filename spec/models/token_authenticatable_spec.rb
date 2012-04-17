@@ -8,11 +8,6 @@ module Devise::Models
       @model = @model_class.new
     end
 
-    it "adds config methods to model class" do
-      @model_class.should respond_to('crowd_token_cookie')
-      @model_class.should respond_to('crowd_token_param')
-    end
-
     it "adds instance methods to model" do
       @model.should respond_to('after_crowd_token_authentication')
     end

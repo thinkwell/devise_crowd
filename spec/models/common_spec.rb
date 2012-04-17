@@ -15,6 +15,7 @@ module Devise::Models
       @model_class.should respond_to('crowd_service_url')
       @model_class.should respond_to('crowd_app_name')
       @model_class.should respond_to('crowd_app_password')
+      @model_class.should respond_to('crowd_token_key')
       @model_class.should respond_to('crowd_username_key')
       @model_class.should respond_to('crowd_auth_every')
       @model_class.should respond_to('crowd_allow_forgery_protection')

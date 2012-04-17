@@ -49,30 +49,30 @@ module Devise::Strategies
     end
 
     def valid_for_crowd_token_auth?
-      crowd_enabled? && has_crowd_tokenkey?
+      crowd_enabled? && has_crowd_token?
     end
 
-    def has_crowd_tokenkey?
-      !!crowd_tokenkey
+    def has_crowd_token?
+      !!crowd_token
     end
 
-    def crowd_tokenkey
+    def crowd_token
       crowd_token_param || crowd_token_cookie
     end
 
     def crowd_token_cookie
-      request.cookies[mapping.to.crowd_token_cookie]
+      request.cookies[mapping.to.crowd_token_key]
     end
 
     def crowd_token_param
-      params[mapping.to.crowd_token_param]
+      params[mapping.to.crowd_token_key]
     end
 
     def authenticate_crowd_token
       username = nil
-      if has_crowd_tokenkey?
-        if crowd_client.is_valid_user_token?(crowd_tokenkey)
-          username = crowd_client.find_username_by_token(crowd_tokenkey)
+      if has_crowd_token?
+        if crowd_client.is_valid_user_token?(crowd_token)
+          username = crowd_client.find_username_by_token(crowd_token)
           DeviseCrowd::Logger.send("cannot find username for token key") unless username
         else
           DeviseCrowd::Logger.send("invalid token key")

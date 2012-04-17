@@ -16,11 +16,8 @@ module Devise
   mattr_accessor :crowd_auth_every
   @@crowd_auth_every = 10.minutes
 
-  mattr_accessor :crowd_token_cookie
-  @@crowd_token_cookie = "crowd.token_key"
-
-  mattr_accessor :crowd_token_param
-  @@crowd_token_param = "crowd.token_key"
+  mattr_accessor :crowd_token_key
+  @@crowd_token_key = "crowd.token_key"
 
   # The name of the crowd username parameter/field.  If nil (default), the
   # first authentication_keys key will be used (e.g. email).

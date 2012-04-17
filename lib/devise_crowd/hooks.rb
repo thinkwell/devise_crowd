@@ -8,7 +8,7 @@ Warden::Manager.after_set_user do |record, warden, options|
     end
 
     crowd_session = DeviseCrowd.session(warden, scope)
-    crowd_token = warden.params[record.class.crowd_token_param] || warden.request.cookies[record.class.crowd_token_cookie]
+    crowd_token = warden.params[record.class.crowd_token_key] || warden.request.cookies[record.class.crowd_token_key]
 
     if crowd_session['last_token'] != crowd_token
       logout.call "Re-authorization required.  Crowd token does not match cached token."

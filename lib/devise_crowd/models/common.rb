@@ -13,7 +13,7 @@ module Devise::Models
     end
 
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection)
+      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection)
 
       def crowd_client
         SimpleCrowd::Client.new({

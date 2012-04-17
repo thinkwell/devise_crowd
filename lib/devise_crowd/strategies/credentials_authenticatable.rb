@@ -4,7 +4,7 @@ require 'devise_crowd/strategies/common'
 module Devise::Strategies
   class CrowdCredentialsAuthenticatable < Authenticatable
     include CrowdCommon
-    attr_accessor :crowd_tokenkey
+    attr_accessor :crowd_token
 
     def valid?
       valid_for_credentials_auth?
@@ -18,7 +18,7 @@ module Devise::Strategies
       end
 
       validate_crowd_username!(crowd_username) do |resource|
-        warden.warden_cookies[mapping.to.crowd_token_cookie] = crowd_tokenkey
+        warden.warden_cookies[mapping.to.crowd_token_key] = crowd_token
         resource.after_crowd_credentials_authentication
       end
     end
@@ -52,9 +52,9 @@ module Devise::Strategies
       token = crowd_client.authenticate_user(username, password) if username
 
       if token
-        self.crowd_tokenkey = token
+        self.crowd_token = token
       else
-        self.crowd_tokenkey = username = nil
+        self.crowd_token = username = nil
         DeviseCrowd::Logger.send("invalid credentials")
       end
 

@@ -42,7 +42,7 @@ module Devise::Strategies
     def cache_authentication
       crowd_session = DeviseCrowd.session(warden, scope)
       crowd_session['last_auth'] = Time.now
-      crowd_session['last_token'] = crowd_tokenkey
+      crowd_session['last_token'] = crowd_token
       DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
     end
 
