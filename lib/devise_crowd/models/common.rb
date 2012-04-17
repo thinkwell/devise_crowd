@@ -12,6 +12,11 @@ module Devise::Models
       last_auth && last_auth <= self.class.crowd_auth_every.ago
     end
 
+    def next_crowd_auth(last_auth)
+      return Time.now unless last_auth
+      last_auth + self.class.crowd_auth_every
+    end
+
     module ClassMethods
       Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection)
 
