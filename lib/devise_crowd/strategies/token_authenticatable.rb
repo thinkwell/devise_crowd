@@ -71,8 +71,8 @@ module Devise::Strategies
     def authenticate_crowd_token
       username = nil
       if has_crowd_token?
-        if crowd_client.is_valid_user_token?(crowd_token)
-          username = crowd_client.find_username_by_token(crowd_token)
+        if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
+          username = DeviseCrowd.crowd_fetch { crowd_client.find_username_by_token(crowd_token) }
           DeviseCrowd::Logger.send("cannot find username for token key") unless username
         else
           DeviseCrowd::Logger.send("invalid token key")

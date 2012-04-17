@@ -18,12 +18,14 @@ module Devise::Strategies
       end
 
       validate_crowd_username!(crowd_username) do |resource|
-        cookie_info = crowd_client.get_cookie_info
-        warden.warden_cookies[mapping.to.crowd_token_key] = {
-          :domain => cookie_info[:domain],
-          :secure => cookie_info[:secure],
-          :value => crowd_token,
-        }
+        cookie_info = DeviseCrowd.crowd_fetch { crowd_client.get_cookie_info }
+        if cookie_info
+          warden.warden_cookies[mapping.to.crowd_token_key] = {
+            :domain => cookie_info[:domain],
+            :secure => cookie_info[:secure],
+            :value => crowd_token,
+          }
+        end
         resource.after_crowd_credentials_authentication
       end
     end
@@ -54,7 +56,7 @@ module Devise::Strategies
 
     def authenticate_crowd_credentials
       username = authentication_hash[mapping.to.crowd_username_key]
-      token = crowd_client.authenticate_user(username, password) if username
+      token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) } if username
 
       if token
         self.crowd_token = token

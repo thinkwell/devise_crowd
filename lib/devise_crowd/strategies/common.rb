@@ -45,6 +45,5 @@ module Devise::Strategies
       crowd_session['last_token'] = crowd_token
       DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
     end
-
   end
 end
