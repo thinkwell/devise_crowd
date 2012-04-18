@@ -1,10 +1,11 @@
 module Devise::Strategies
   module CrowdCommon
+    attr_accessor :crowd_username
 
     private
 
-    def validate_crowd_username!(crowd_username)
-      resource = mapping.to.find_for_crowd_username(crowd_username)
+    def validate_crowd_username!
+      resource = mapping.to.find_for_crowd_username(crowd_username) if crowd_username
       if validate(resource)
         return if halted?
         if crowd_allow_forgery_protection? && crowd_unverified_request?
@@ -41,8 +42,9 @@ module Devise::Strategies
 
     def cache_authentication
       crowd_session = DeviseCrowd.session(warden, scope)
-      crowd_session['last_auth'] = Time.now
-      crowd_session['last_token'] = crowd_token
+      crowd_session['crowd.last_auth'] = Time.now
+      crowd_session['crowd.last_token'] = crowd_token
+      crowd_session['crowd.last_username'] = crowd_username
       DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
     end
   end

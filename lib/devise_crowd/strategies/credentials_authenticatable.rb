@@ -11,21 +11,14 @@ module Devise::Strategies
     end
 
     def authenticate!
-      crowd_username = authenticate_crowd_credentials
+      authenticate_crowd_credentials
       unless crowd_username
         DeviseCrowd::Logger.send "not authenticated!"
         return fail(:crowd_invalid_credentials)
       end
 
-      validate_crowd_username!(crowd_username) do |resource|
-        cookie_info = DeviseCrowd.crowd_fetch { crowd_client.get_cookie_info }
-        if cookie_info
-          warden.cookies[mapping.to.crowd_token_key] = {
-            :domain => cookie_info[:domain],
-            :secure => cookie_info[:secure],
-            :value => crowd_token,
-          }
-        end
+      validate_crowd_username! do |resource|
+        DeviseCrowd.set_cookie(crowd_token, warden, mapping.to, crowd_client)
         resource.after_crowd_credentials_authentication
       end
     end
@@ -60,12 +53,11 @@ module Devise::Strategies
 
       if token
         self.crowd_token = token
+        self.crowd_username = username
       else
-        self.crowd_token = username = nil
+        self.crowd_token = self.crowd_username = nil
         DeviseCrowd::Logger.send("invalid credentials")
       end
-
-      username
     end
 
   end

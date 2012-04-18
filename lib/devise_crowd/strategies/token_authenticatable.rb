@@ -10,13 +10,13 @@ module Devise::Strategies
     end
 
     def authenticate!
-      crowd_username = authenticate_crowd_token
+      authenticate_crowd_token
       unless crowd_username
         DeviseCrowd::Logger.send "not authenticated!"
         return fail(:crowd_invalid_token)
       end
 
-      validate_crowd_username!(crowd_username) do |resource|
+      validate_crowd_username! do |resource|
         resource.after_crowd_token_authentication
       end
     end
@@ -69,17 +69,15 @@ module Devise::Strategies
     end
 
     def authenticate_crowd_token
-      username = nil
+      self.crowd_username = nil
       if has_crowd_token?
         if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
-          username = DeviseCrowd.crowd_fetch { crowd_client.find_username_by_token(crowd_token) }
-          DeviseCrowd::Logger.send("cannot find username for token key") unless username
+          self.crowd_username = DeviseCrowd.crowd_fetch { crowd_client.find_username_by_token(crowd_token) }
+          DeviseCrowd::Logger.send("cannot find username for token key") unless self.crowd_username
         else
           DeviseCrowd::Logger.send("invalid token key")
         end
       end
-
-      username
     end
   end
 end
