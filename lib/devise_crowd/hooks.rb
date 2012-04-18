@@ -42,7 +42,4 @@ Warden::Manager.before_logout do |record, warden, options|
       record ? record.crowd_client : nil
     )
   end
-
-  DeviseCrowd.remove_session(warden, options[:scope])
-  DeviseCrowd::Logger.send "Removed cached crowd authorization."
 end
