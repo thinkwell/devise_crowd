@@ -13,7 +13,7 @@ module Devise::Strategies
     def authenticate!
       authenticate_crowd_credentials
       unless crowd_username
-        DeviseCrowd::Logger.send "not authenticated!"
+        DeviseCrowd::Logger.send "not authenticated via #{authenticatable_name} (invalid credentials)!"
         return fail(:crowd_invalid_credentials)
       end
 
@@ -56,7 +56,6 @@ module Devise::Strategies
         self.crowd_username = username
       else
         self.crowd_token = self.crowd_username = nil
-        DeviseCrowd::Logger.send("invalid credentials")
       end
     end
 

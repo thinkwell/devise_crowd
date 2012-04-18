@@ -12,13 +12,13 @@ module Devise::Strategies
           DeviseCrowd::Logger.send("Can't verify CSRF token authenticity.")
           fail(:crowd_unverified_request)
         else
-          DeviseCrowd::Logger.send("authenticated!")
+          DeviseCrowd::Logger.send("authenticated via #{authenticatable_name}!")
           cache_authentication if store?
           yield(resource) if block_given?
           success!(resource)
         end
       else
-        DeviseCrowd::Logger.send("not authenticated!")
+        DeviseCrowd::Logger.send("not authenticated via #{authenticatable_name} (no local user)!")
         return if halted?
         fail(:crowd_unknown_user)
       end
@@ -46,6 +46,14 @@ module Devise::Strategies
       crowd_session['crowd.last_token'] = crowd_token
       crowd_session['crowd.last_username'] = crowd_username
       DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
+    end
+
+    # Holds the authenticatable name for this class. Devise::Strategies::DatabaseAuthenticatable
+    # becomes simply :database.
+    def authenticatable_name
+      @authenticatable_name ||=
+        ActiveSupport::Inflector.underscore(self.class.name.split("::").last).
+          sub("_authenticatable", "").to_sym
     end
   end
 end
