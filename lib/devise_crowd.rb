@@ -3,6 +3,7 @@ require 'devise'
 require 'simple_crowd'
 
 require 'devise_crowd/helpers'
+require 'devise_crowd/cookie'
 require 'devise_crowd/logger'
 require 'devise_crowd/config'
 require 'devise_crowd/schema'
