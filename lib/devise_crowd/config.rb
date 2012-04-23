@@ -14,7 +14,7 @@ module Devise
   @@crowd_app_password = ""
 
   mattr_accessor :crowd_auth_every
-  @@crowd_auth_every = 10.minutes
+  @@crowd_auth_every = 0
 
   mattr_accessor :crowd_token_key
   @@crowd_token_key = "crowd.token_key"
