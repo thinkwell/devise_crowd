@@ -32,6 +32,14 @@ module Devise::Models
       @model.should respond_to('after_crowd_authentication')
     end
 
+    it "adds callback methods" do
+      @model_class.should respond_to('before_create_from_crowd')
+      @model_class.should respond_to('after_create_from_crowd')
+      @model_class.should respond_to('around_create_from_crowd')
+      @model_class.should respond_to('before_sync_from_crowd')
+      @model_class.should respond_to('after_sync_from_crowd')
+      @model_class.should respond_to('around_sync_from_crowd')
+    end
 
     describe 'crowd_enabled?' do
       it "returns true when strategy is in an array of strategies" do
@@ -60,6 +68,47 @@ module Devise::Models
         mock(Devise).crowd_username_key.at_least(1) {nil}
         mock(Devise).authentication_keys.at_least(1) {[:foo, :bar]}
         @model_class.crowd_username_key.should == :foo
+      end
+    end
+
+    describe '#create_from_crowd' do
+      it "calls do_create_from_crowd" do
+        mock(@model).do_create_from_crowd
+        @model.create_from_crowd
+      end
+
+      it "calls sync_from_crowd by default" do
+        mock(@model).sync_from_crowd
+        @model.create_from_crowd
+      end
+
+      it "runs callbacks" do
+        mock(@model).run_callbacks(:create_from_crowd) {false}
+        @model.create_from_crowd.should == false
+      end
+
+      it "terminates if :before callback returns false" do
+        mock(@model).allow_create_from_crowd? {false}
+        dont_allow(@model).do_create_from_crowd
+        @model.create_from_crowd
+      end
+    end
+
+    describe '#sync_from_crowd' do
+      it "calls do_sync_from_crowd" do
+        mock(@model).do_sync_from_crowd
+        @model.sync_from_crowd
+      end
+
+      it "runs callbacks" do
+        mock(@model).run_callbacks(:sync_from_crowd) {false}
+        @model.sync_from_crowd.should == false
+      end
+
+      it "terminates if :before callback returns false" do
+        mock(@model).allow_sync_from_crowd? {false}
+        dont_allow(@model).do_sync_from_crowd
+        @model.sync_from_crowd
       end
     end
 

@@ -1,6 +1,7 @@
 module Devise::Strategies
   module CrowdCommon
     attr_accessor :crowd_username, :crowd_record
+    attr_reader :crowd_token
 
     def crowd_username
       @crowd_username ||= @crowd_record && @crowd_record[:username]
@@ -23,7 +24,11 @@ module Devise::Strategies
     private
 
     def validate_crowd_username!
-      resource = mapping.to.find_for_crowd_username(crowd_username) if crowd_username
+      if crowd_username
+        resource = mapping.to.find_for_crowd_username(crowd_username)
+        resource = create_from_crowd if !resource && crowd_auto_register?
+      end
+
       if validate(resource)
         return if halted?
         if crowd_allow_forgery_protection? && crowd_unverified_request?
@@ -31,6 +36,7 @@ module Devise::Strategies
           fail(:crowd_unverified_request)
         else
           DeviseCrowd::Logger.send("authenticated via #{authenticatable_name}!")
+          sync_from_crowd(resource) if sync_from_crowd?
           cache_authentication if store?
           yield(resource) if block_given?
           success!(resource)
@@ -54,6 +60,10 @@ module Devise::Strategies
       !!request.env['crowd.unverified_request']
     end
 
+    def crowd_auto_register?
+      !!mapping.to.crowd_auto_register
+    end
+
     def crowd_client
       @crowd_client ||= mapping.to.crowd_client
     end
@@ -72,6 +82,37 @@ module Devise::Strategies
       @authenticatable_name ||=
         ActiveSupport::Inflector.underscore(self.class.name.split("::").last).
           sub("_authenticatable", "").to_sym
+    end
+
+    def create_from_crowd
+      resource = mapping.to.new({mapping.to.crowd_username_key => crowd_username})
+      resource.crowd_client = crowd_client
+      resource.crowd_record = crowd_record
+      result = resource.create_from_crowd
+      return nil if result == false
+      unless resource.save
+        DeviseCrowd::Logger.send("Could not create local user from crowd record (#{resource.errors.messages.inspect})")
+        return nil
+      end
+      DeviseCrowd::Logger.send("Created new local user from crowd record (username=#{crowd_username}).")
+      @created_record = true
+      resource
+    end
+
+    def sync_from_crowd?
+      return false if @created_record
+      crowd_session = DeviseCrowd.session(warden, scope)
+      !crowd_session['crowd.last_token'] || crowd_session['crowd.last_token'] != crowd_token
+    end
+
+    def sync_from_crowd(resource)
+      return unless resource
+      resource.crowd_client = crowd_client
+      resource.crowd_record = crowd_record
+      result = resource.sync_from_crowd
+      return nil if result == false
+      DeviseCrowd::Logger.send("Synchronized from crowd record.")
+      resource.save
     end
   end
 end

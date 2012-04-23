@@ -5,6 +5,13 @@ module Devise::Models
   module CrowdCommon
     extend ActiveSupport::Concern
 
+    included do |base|
+      base.send :define_model_callbacks, :create_from_crowd
+      base.send :define_model_callbacks, :sync_from_crowd
+    end
+
+    attr_accessor :crowd_client, :crowd_record
+
     def after_crowd_authentication
     end
 
@@ -21,8 +28,36 @@ module Devise::Models
       @crowd_client ||= self.class.crowd_client
     end
 
+    # Create a new local record from a crowd record.
+    # Subclasses should override `do_create_from_crowd` instead of this method.
+    def create_from_crowd
+      run_callbacks(:create_from_crowd) do
+        result = do_create_from_crowd
+        result == false ? false : true
+      end
+    end
+
+    def do_create_from_crowd
+      sync_from_crowd
+    end
+    private :do_create_from_crowd
+
+    # Synchronize from the crowd record to the local record.
+    # Subclasses should override `do_sync_from_crowd` instead of this method.
+    def sync_from_crowd
+      run_callbacks(:sync_from_crowd) do
+        result = do_sync_from_crowd
+        result == false ? false : true
+      end
+    end
+
+    def do_sync_from_crowd
+    end
+    private :do_sync_from_crowd
+
+
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection)
+      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection, :crowd_auto_register)
 
       def crowd_client
         SimpleCrowd::Client.new({

@@ -22,6 +22,7 @@ Devise.setup do |config|
   config.reset_password_within = 2.hours
 end
 require 'mock/user'
+require 'mock/strategy'
 require 'rails_app/config/environment'
 
 

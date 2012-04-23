@@ -10,6 +10,7 @@ module Devise::Strategies
     before(:each) do
       Devise.add_mapping(:mock_users, :class_name => Devise::Mock::User)
       @model = Devise::Mock::User.new(:id => 555)
+      stub(@model).save
     end
 
     def strategy(uri, params=nil)
@@ -41,11 +42,20 @@ module Devise::Strategies
         mock(@mock_crowd_client).authenticate_user(crowd_username, crowd_password) {crowd_token}
         mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
         @strategy.valid? && @strategy.authenticate!
+        @warden.cookies['crowd.token_key'].should be_a(Hash)
         @warden.cookies['crowd.token_key'].should include(:value => crowd_token)
       end
 
       it "rejects invalid crowd credentials" do
         mock(@mock_crowd_client).authenticate_user(crowd_username, crowd_password) {nil}
+        @strategy.valid? && @strategy.authenticate!
+        @strategy.result.should == :failure
+      end
+
+      it "rejects an unknown crowd username" do
+        stub(Devise).crowd_auto_register {false}
+        mock(@mock_crowd_client).authenticate_user(crowd_username, crowd_password) {crowd_token}
+        mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){nil}
         @strategy.valid? && @strategy.authenticate!
         @strategy.result.should == :failure
       end

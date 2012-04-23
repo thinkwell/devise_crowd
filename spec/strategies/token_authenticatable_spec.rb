@@ -10,6 +10,7 @@ module Devise::Strategies
     before(:each) do
       Devise.add_mapping(:mock_users, :class_name => Devise::Mock::User)
       @model = Devise::Mock::User.new(:id => 555)
+      stub(@model).save
     end
 
     def strategy(uri, cookies={})
@@ -43,6 +44,7 @@ module Devise::Strategies
       end
 
       it "rejects an unknown crowd username" do
+        stub(Devise).crowd_auto_register {false}
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
         mock(@mock_crowd_client).find_user_by_token(crowd_token) {{:username => 'foobar'}}
         mock(Devise::Mock::User).find_for_authentication({:email => 'foobar'}){nil}
@@ -51,7 +53,7 @@ module Devise::Strategies
       end
 
       it "uses the cached crowd_username" do
-        mock(DeviseCrowd).session.with_any_args {{'crowd.last_token' => crowd_token, 'crowd.last_username' => crowd_username}}
+        stub(DeviseCrowd).session.with_any_args {{'crowd.last_token' => crowd_token, 'crowd.last_username' => crowd_username}}
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
         dont_allow(@mock_crowd_client).find_user_by_token(crowd_token)
         mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}

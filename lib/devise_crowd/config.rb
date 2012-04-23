@@ -30,4 +30,7 @@ module Devise
   mattr_accessor :crowd_allow_forgery_protection
   @@crowd_allow_forgery_protection = true
 
+  mattr_accessor :crowd_auto_register
+  @@crowd_auto_register = true
+
 end
