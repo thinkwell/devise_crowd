@@ -29,7 +29,7 @@ module Devise::Strategies
 
       it "authenticates the crowd token" do
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
-        mock(@mock_crowd_client).find_username_by_token(crowd_token) {crowd_username}
+        mock(@mock_crowd_client).find_user_by_token(crowd_token) {{:username => crowd_username}}
         mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
         #mock.proxy(@strategy).success!(@model)
         @strategy.authenticate!
@@ -44,10 +44,19 @@ module Devise::Strategies
 
       it "rejects an unknown crowd username" do
         mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
-        mock(@mock_crowd_client).find_username_by_token(crowd_token) {'foobar'}
+        mock(@mock_crowd_client).find_user_by_token(crowd_token) {{:username => 'foobar'}}
         mock(Devise::Mock::User).find_for_authentication({:email => 'foobar'}){nil}
         @strategy.authenticate!
         @strategy.result.should == :failure
+      end
+
+      it "uses the cached crowd_username" do
+        mock(DeviseCrowd).session.with_any_args {{'crowd.last_token' => crowd_token, 'crowd.last_username' => crowd_username}}
+        mock(@mock_crowd_client).is_valid_user_token?(crowd_token) {true}
+        dont_allow(@mock_crowd_client).find_user_by_token(crowd_token)
+        mock(Devise::Mock::User).find_for_authentication({:email => crowd_username}){@model}
+        @strategy.authenticate!
+        @strategy.result.should == :success
       end
     end
 

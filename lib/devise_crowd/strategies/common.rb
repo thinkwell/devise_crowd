@@ -1,6 +1,24 @@
 module Devise::Strategies
   module CrowdCommon
-    attr_accessor :crowd_username
+    attr_accessor :crowd_username, :crowd_record
+
+    def crowd_username
+      @crowd_username ||= @crowd_record && @crowd_record[:username]
+    end
+
+    def crowd_username=(username)
+      @crowd_record = nil
+      @crowd_username = username
+    end
+
+    def crowd_record
+      @crowd_record ||= @crowd_username && DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(@crowd_username) }
+    end
+
+    def crowd_record=(record)
+      @crowd_record = record
+      @crowd_username = record ? record[:username] : nil
+    end
 
     private
 
