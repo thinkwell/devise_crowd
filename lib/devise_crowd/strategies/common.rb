@@ -90,11 +90,7 @@ module Devise::Strategies
       resource.crowd_record = crowd_record
       result = resource.create_from_crowd
       return nil if result == false
-      unless resource.save
-        DeviseCrowd::Logger.send("Could not create local user from crowd record (#{resource.errors.messages.inspect})")
-        return nil
-      end
-      DeviseCrowd::Logger.send("Created new local user from crowd record (username=#{crowd_username}).")
+      return nil unless resource.errors.empty?
       @created_record = true
       resource
     end
@@ -111,8 +107,6 @@ module Devise::Strategies
       resource.crowd_record = crowd_record
       result = resource.sync_from_crowd
       return nil if result == false
-      DeviseCrowd::Logger.send("Synchronized from crowd record.")
-      resource.save
     end
   end
 end

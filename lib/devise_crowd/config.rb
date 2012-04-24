@@ -33,4 +33,9 @@ module Devise
   mattr_accessor :crowd_auto_register
   @@crowd_auto_register = true
 
+  mattr_accessor :add_crowd_records
+  @@add_crowd_records = false
+
+  mattr_accessor :update_crowd_records
+  @@update_crowd_records = true
 end

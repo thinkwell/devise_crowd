@@ -63,7 +63,6 @@ synchronized from crowd.  You define what data should be synchronized in the
 
 ### Synchronizing to Crowd
 
-** TODO: Implement **
 When a local record is modified, the changes can be synchronized to the Crowd
 record.  You define what data should be synchronized in the `do_sync_to_crowd`
 method.  For example:
@@ -95,7 +94,6 @@ will be added by default.  You can disable auto-registration with the
 
 ### Auto Add Crowd Records
 
-**TODO: Implement**
 When a new local user is added, devise_crowd can add a corresponding user to
 Crowd.  This is disabled by default.
 
@@ -107,7 +105,6 @@ Crowd.  This is disabled by default.
 
 ### Auto Update Crowd Records
 
-**TODO: Implement**
 When a local user is updated, devise_crowd will update the corresponding Crowd
 user.  This is enabled by default.
 
@@ -138,7 +135,7 @@ before_sync_from_crowd
 after_sync_from_crowd
 after_create_from_crowd
 
-before_crowd_record
+before_create_crowd_record
 before_sync_to_crowd
 after_sync_to_crowd
 after_create_crowd_record
@@ -173,13 +170,11 @@ when existing Crowd users log in to your application.
 
 ### before_create_crowd_record, after_create_crowd_record
 
-**TODO: Implement**
 Called when creating a new crowd record from a new local record.  These
 callbacks are only executed if the `add_crowd_records` setting is enabled.
 
 
 ### before_sync_to_crowd, after_create_to_crowd
 
-**TODO: Implement**
 Called when syncing a local record to a crowd record.  These callbacks can be
 disabled by turning off the `update_crowd_records` setting.

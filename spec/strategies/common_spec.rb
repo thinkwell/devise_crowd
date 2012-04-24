@@ -77,7 +77,6 @@ module Devise::Strategies
 
       it "creates a new local record" do
         mock(Devise::Mock::User).new(:email => crowd_username) {@model}
-        mock(@model).save {true}
         @strategy.create_from_crowd.should == @model
       end
 
@@ -112,11 +111,6 @@ module Devise::Strategies
       it "sets crowd_record on resource" do
         @strategy.sync_from_crowd(@model)
         @model.crowd_record.should == @record
-      end
-
-      it "saves the resource" do
-        mock(@model).save
-        @strategy.sync_from_crowd(@model)
       end
     end
   end
