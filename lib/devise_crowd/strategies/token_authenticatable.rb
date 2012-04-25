@@ -23,8 +23,8 @@ module Devise::Strategies
 
     # Store user information in a session if crowd_auth_every is set
     def store?
-      !mapping.to.skip_session_storage.include?(:crowd_token_auth) &&
-        mapping.to.crowd_auth_every.to_i > 0
+      !resource_class.skip_session_storage.include?(:crowd_token_auth) &&
+        resource_class.crowd_auth_every.to_i > 0
     end
 
 
@@ -45,7 +45,7 @@ module Devise::Strategies
     end
 
     def crowd_enabled?
-      mapping.to.crowd_enabled?(:crowd_token)
+      resource_class.crowd_enabled?(:crowd_token)
     end
 
     def valid_for_crowd_token_auth?
@@ -61,11 +61,11 @@ module Devise::Strategies
     end
 
     def crowd_token_cookie
-      request.cookies[mapping.to.crowd_token_key]
+      request.cookies[resource_class.crowd_token_key]
     end
 
     def crowd_token_param
-      params[mapping.to.crowd_token_key]
+      params[resource_class.crowd_token_key]
     end
 
     def authenticate_crowd_token

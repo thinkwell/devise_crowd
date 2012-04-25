@@ -183,6 +183,9 @@ module Devise::Models
         find_for_authentication({self.crowd_username_key => username})
       end
 
+      def crowd_resource_class
+        self
+      end
     end
   end
 end

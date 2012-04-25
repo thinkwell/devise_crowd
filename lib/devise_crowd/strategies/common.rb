@@ -25,7 +25,7 @@ module Devise::Strategies
 
     def validate_crowd_username!
       if crowd_username
-        resource = mapping.to.find_for_crowd_username(crowd_username)
+        resource = resource_class.find_for_crowd_username(crowd_username)
         resource = create_from_crowd if !resource && crowd_auto_register?
       end
 
@@ -48,12 +48,16 @@ module Devise::Strategies
       end
     end
 
+    def resource_class
+      mapping.to.crowd_resource_class
+    end
+
     def warden
       env['warden']
     end
 
     def crowd_allow_forgery_protection?
-      !!mapping.to.crowd_allow_forgery_protection
+      !!resource_class.crowd_allow_forgery_protection
     end
 
     def crowd_unverified_request?
@@ -61,11 +65,11 @@ module Devise::Strategies
     end
 
     def crowd_auto_register?
-      !!mapping.to.crowd_auto_register
+      !!resource_class.crowd_auto_register
     end
 
     def crowd_client
-      @crowd_client ||= mapping.to.crowd_client
+      @crowd_client ||= resource_class.crowd_client
     end
 
     def cache_authentication
@@ -73,7 +77,7 @@ module Devise::Strategies
       crowd_session['crowd.last_auth'] = Time.now
       crowd_session['crowd.last_token'] = crowd_token
       crowd_session['crowd.last_username'] = crowd_username
-      DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + mapping.to.crowd_auth_every}."
+      DeviseCrowd::Logger.send "Cached crowd authorization.  Next authorization at #{Time.now + resource_class.crowd_auth_every}."
     end
 
     # Holds the authenticatable name for this class. Devise::Strategies::DatabaseAuthenticatable
@@ -85,7 +89,7 @@ module Devise::Strategies
     end
 
     def create_from_crowd
-      resource = mapping.to.new({mapping.to.crowd_username_key => crowd_username})
+      resource = resource_class.crowd_resource_class.new({resource_class.crowd_username_key => crowd_username})
       resource.crowd_client = crowd_client
       resource.crowd_record = crowd_record
       result = resource.create_from_crowd
