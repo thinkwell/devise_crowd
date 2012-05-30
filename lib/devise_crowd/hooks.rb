@@ -33,13 +33,13 @@ end
 Warden::Manager.after_authentication do |record, warden, options|
   scope = options[:scope]
   strategy = warden.winning_strategy
-  return unless strategy && strategy.is_a?(Devise::Strategies::CrowdCommon)
-
-  if warden.env['crowd.reauthentication']
-    # Don't "renew" the session (generate a new session ID) for reauthentications
-    warden.env.delete('crowd.reauthentication')
-    options = warden.env[Warden::Proxy::ENV_SESSION_OPTIONS]
-    options[:renew] = false if options
+  if strategy && strategy.is_a?(Devise::Strategies::CrowdCommon)
+    if warden.env['crowd.reauthentication']
+      # Don't "renew" the session (generate a new session ID) for reauthentications
+      warden.env.delete('crowd.reauthentication')
+      options = warden.env[Warden::Proxy::ENV_SESSION_OPTIONS]
+      options[:renew] = false if options
+    end
   end
 end
 
