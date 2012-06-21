@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
-  s.add_runtime_dependency(%q<simple_crowd>, [">= 1.1.0"])
+  s.add_runtime_dependency(%q<simple_crowd>, [">= 1.1.3"])
   s.add_runtime_dependency %q<activesupport>
-  s.add_runtime_dependency(%q<devise>, [">= 2.0.4"])
+  s.add_runtime_dependency(%q<devise>, [">= 2.1.0"])
 end

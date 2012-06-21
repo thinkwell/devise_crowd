@@ -14,11 +14,9 @@ require 'devise_crowd'
 require 'simple_crowd/mock_client'
 
 Devise.setup do |config|
-  config.apply_schema = false
   require 'devise/orm/mongoid'
   config.crowd_enabled = true
   config.case_insensitive_keys = [ ]
-  config.use_salt_as_remember_token = true
   config.reset_password_within = 2.hours
 end
 require 'mock/user'

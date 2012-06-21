@@ -29,7 +29,7 @@ module Devise::Strategies
         resource = create_from_crowd if !resource && crowd_auto_register?
       end
 
-      if validate(resource)
+      if resource && validate(resource)
         return if halted?
         if crowd_allow_forgery_protection? && crowd_unverified_request?
           DeviseCrowd::Logger.send("Can't verify CSRF token authenticity.")

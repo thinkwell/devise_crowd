@@ -6,7 +6,6 @@ require 'devise_crowd/helpers'
 require 'devise_crowd/cookie'
 require 'devise_crowd/logger'
 require 'devise_crowd/config'
-require 'devise_crowd/schema'
 require 'devise_crowd/railtie' if defined?(Rails)
 
 Devise.add_module(:crowd_token_authenticatable,
