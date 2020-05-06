@@ -71,14 +71,23 @@ module Devise::Strategies
     def authenticate_crowd_token
       self.crowd_record = nil
       if has_crowd_token?
-        if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
-          crowd_session = DeviseCrowd.session(warden, scope)
-          if crowd_session['crowd.last_token'] == crowd_token && crowd_session['crowd.last_username']
-            self.crowd_username = crowd_session['crowd.last_username']
-          else
-            self.crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_token(crowd_token) }
+        # try to first authenticate against DB token if exists
+        resource = resource_class.find_by_token(crowd_token)
+        if resource
+          self.crowd_username = resource.send(resource_class.crowd_username_key)
+        end
+
+        unless self.crowd_username
+          Rails.logger.debug "AUTHENTICATE token : #{username} : in CROWD ..."
+          if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
+            crowd_session = DeviseCrowd.session(warden, scope)
+            if crowd_session['crowd.last_token'] == crowd_token && crowd_session['crowd.last_username']
+              self.crowd_username = crowd_session['crowd.last_username']
+            else
+              self.crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_token(crowd_token) }
+            end
+            DeviseCrowd::Logger.send("cannot find user for token key") unless self.crowd_username
           end
-          DeviseCrowd::Logger.send("cannot find user for token key") unless self.crowd_username
         end
       end
     end
