@@ -49,7 +49,35 @@ module Devise::Strategies
 
     def authenticate_crowd_credentials
       username = authentication_hash[resource_class.crowd_username_key]
-      token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) } if username
+
+      if username
+        # try to first authenticate against DB password if exists
+        resource = resource_class.find_by_username(username)
+        if resource && resource.valid_password?(password)
+          token = resource.get_or_create_token
+        end
+
+        # if DB authentication not successful try against crowd
+        unless token
+          Rails.logger.debug "AUTHENTICATE : #{username} : in CROWD ..."
+          token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) }
+        end
+
+        if token
+          # if user does not exist create and update from crowd user
+          unless resource
+            resource = resource_class.new
+            crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(username) }
+            resource.update_from_crowd_user crowd_user
+            Rails.logger.debug "AUTHENTICATE : #{username} : created user from CROWD #{crowd_user.inspect}"
+          end
+
+          # if successful update password hash in DB via devise
+          Rails.logger.debug "AUTHENTICATE : #{username} : update password in DB"
+          resource.password = password
+          resource.save!
+        end
+      end
 
       if token
         self.crowd_token = token
