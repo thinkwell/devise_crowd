@@ -25,7 +25,13 @@ module Devise::Strategies
     private
 
     def validate_crowd_username!
+      # lookup resource on DB first
       if crowd_username
+        resource = resource_class.find_by_username(crowd_username)
+      end
+
+      # if resource not found lookup on CROWD
+      if crowd_username && !resource
         resource = resource_class.find_for_crowd_username(crowd_username)
         resource = create_from_crowd if !resource && crowd_auto_register?
       end
