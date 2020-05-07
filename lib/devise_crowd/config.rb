@@ -33,6 +33,12 @@ module Devise
   mattr_accessor :crowd_auto_register
   @@crowd_auto_register = true
 
+  mattr_accessor :cookie_domain
+  @@cookie_domain = nil
+
+  mattr_accessor :cookie_secure
+  @@cookie_secure = nil
+
   mattr_accessor :add_crowd_records
   @@add_crowd_records = false
 
