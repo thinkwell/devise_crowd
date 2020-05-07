@@ -78,7 +78,7 @@ module Devise::Strategies
         end
 
         unless self.crowd_username
-          Rails.logger.debug "AUTHENTICATE token : #{crowd_token} : in CROWD ..."
+          Rails.logger.debug "DEVISE TOKEN AUTH : #{crowd_token} : in CROWD ..."
           if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
             crowd_session = DeviseCrowd.session(warden, scope)
             if crowd_session['crowd.last_token'] == crowd_token && crowd_session['crowd.last_username']

@@ -59,7 +59,7 @@ module Devise::Strategies
 
         # if DB authentication not successful try against crowd
         unless token
-          Rails.logger.debug "AUTHENTICATE : #{username} : in CROWD ..."
+          Rails.logger.debug "DEVISE CREDS AUTH : #{username} : in CROWD ..."
           token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) }
 
           if token
@@ -68,11 +68,11 @@ module Devise::Strategies
               resource = resource_class.new
               crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(username) }
               resource.update_from_crowd_user crowd_user
-              Rails.logger.debug "AUTHENTICATE : #{username} : created user from CROWD #{crowd_user.inspect}"
+              Rails.logger.debug "DEVISE CREDS AUTH : #{username} : created user from CROWD #{crowd_user.inspect}"
             end
 
             # if successful update password hash in DB via devise
-            Rails.logger.debug "AUTHENTICATE : #{username} : update password in DB"
+            Rails.logger.debug "DEVISE CREDS AUTH : #{username} : update password in DB"
             resource.password = password
             resource.save!
           end
