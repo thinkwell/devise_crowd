@@ -13,8 +13,12 @@ module Devise::Strategies
     end
 
     def crowd_record
-      Rails.logger.debug "DEVISE CROWD : crowd_record : find_user_by_name #{@crowd_username}"
-      @crowd_record ||= @crowd_username && DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(@crowd_username) }
+      if !@crowd_record && @crowd_username
+        Rails.logger.debug "DEVISE CROWD : crowd_record : find_user_by_name #{@crowd_username}"
+        @crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(@crowd_username) }
+      end
+
+      @crowd_record
     end
 
     def crowd_record=(record)
