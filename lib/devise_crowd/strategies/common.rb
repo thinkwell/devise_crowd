@@ -31,7 +31,7 @@ module Devise::Strategies
     def validate_crowd_username!
       # lookup resource on DB first
       if crowd_username
-        resource = resource_class.find_by_username(crowd_username)
+        resource = resource_class.find_by_username_or_email(crowd_username)
       end
 
       # if resource not found lookup on CROWD

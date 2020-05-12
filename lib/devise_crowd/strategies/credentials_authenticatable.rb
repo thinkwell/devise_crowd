@@ -48,40 +48,47 @@ module Devise::Strategies
     end
 
     def authenticate_crowd_credentials
-      username = authentication_hash[resource_class.crowd_username_key]
-
-      if username
+      crowd_username = authentication_hash[resource_class.crowd_username_key]
+      email = params[@scope][:username] || params[@scope][:email] || crowd_username
+      if email
         # try to first authenticate against DB password if exists
-        resource = resource_class.find_by_username(username)
-        if resource && resource.valid_password?(password)
-          token = resource.get_or_create_token
-        end
-
-        # if DB authentication not successful try against crowd
-        unless token
-          Rails.logger.debug "DEVISE CREDS AUTH : #{username} : in CROWD ..."
-          token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) }
-
-          if token
-            # if user does not exist create and update from crowd user
-            unless resource
-              resource = resource_class.new
-              crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(username) }
-              resource.update_from_crowd_user crowd_user
-              Rails.logger.debug "DEVISE CREDS AUTH : #{username} : created user from CROWD #{crowd_user.inspect}"
-            end
-
-            # if successful update password hash in DB via devise
-            Rails.logger.debug "DEVISE CREDS AUTH : #{username} : update password in DB"
-            resource.password = password
-            resource.save!
+        resource = resource_class.find_by_username_or_email(email)
+        unless resource
+          Rails.logger.debug "DEVISE CREDS AUTH : #{email} : no User found in DB"
+        else
+          if resource.valid_password?(password)
+            crowd_username = email
+            token = resource.get_or_create_token
+          else
+            Rails.logger.debug "DEVISE CREDS AUTH : #{email} : password in DB does not match"
           end
+        end
+      end
+
+      # if DB authentication not successful try against crowd
+      unless token
+        Rails.logger.debug "DEVISE CREDS AUTH : #{crowd_username} : in CROWD ..."
+        token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
+
+        if token
+          # if user does not exist create and update from crowd user
+          unless resource
+            resource = resource_class.new
+            crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(crowd_username) }
+            resource.update_from_crowd_user crowd_user
+            Rails.logger.debug "DEVISE CREDS AUTH : #{resource.email} : created user from CROWD #{crowd_user.inspect}"
+          end
+
+          # if successful update password hash in DB via devise
+          Rails.logger.debug "DEVISE CREDS AUTH : #{resource.email} : update password in DB"
+          resource.password = password
+          resource.save!
         end
       end
 
       if token
         self.crowd_token = token
-        self.crowd_username = username
+        self.crowd_username = crowd_username
       else
         self.crowd_token = self.crowd_username = nil
       end
