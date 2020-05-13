@@ -7,6 +7,9 @@ module Devise
   mattr_accessor :crowd_service_url
   @@crowd_service_url = "http://localhost:8095/crowd"
 
+  mattr_accessor :crowd_noop
+  @@crowd_noop = false
+
   mattr_accessor :crowd_app_name
   @@crowd_app_name = "crowd"
 
