@@ -59,9 +59,9 @@ module Devise::Strategies
           if resource.valid_password?(password)
             crowd_username = email
             if resource.user_token
-              token = resource.upsert_user_token resource.user_token.token
+              token = resource.upsert_user_token(resource.user_token.token).token
             else
-              token = resource.upsert_user_token
+              token = resource.upsert_user_token().token
             end
           else
             Rails.logger.info "DEVISE CREDS AUTH : #{email} : password in DB does not match"
