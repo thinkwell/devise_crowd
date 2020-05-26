@@ -54,7 +54,7 @@ module Devise::Strategies
         # try to first authenticate against DB password if exists
         resource = resource_class.find_by_username_or_email(email)
         unless resource
-          Rails.logger.info "DEVISE CREDS AUTH : #{email} : no User found in DB"
+          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : no User found in DB"
         else
           if resource.valid_password?(password)
             crowd_username = email
@@ -64,14 +64,14 @@ module Devise::Strategies
               token = resource.upsert_user_token().token
             end
           else
-            Rails.logger.info "DEVISE CREDS AUTH : #{email} : password in DB does not match"
+            DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : password in DB does not match"
           end
         end
       end
 
       # if DB authentication not successful try against crowd
       unless token
-        Rails.logger.info "DEVISE CREDS AUTH : #{crowd_username} : in CROWD ..."
+        DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{crowd_username} : in CROWD ..."
         token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
 
         if token
@@ -80,14 +80,14 @@ module Devise::Strategies
             resource = resource_class.new
             crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(crowd_username) }
             resource.update_from_crowd_user crowd_user
-            Rails.logger.info "DEVISE CREDS AUTH : #{resource.email} : created user from CROWD #{crowd_user.inspect}"
+            DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : created user from CROWD #{crowd_user.inspect}"
           end
 
-          Rails.logger.info "DEVISE CREDS AUTH : #{resource.email} : upsert user token in DB : #{token}"
+          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : upsert user token in DB : #{token}"
           resource.upsert_user_token token
 
           # if successful update password hash in DB via devise
-          Rails.logger.info "DEVISE CREDS AUTH : #{resource.email} : update password in DB"
+          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : update password in DB"
           resource.password = password
           resource.save!
         end
