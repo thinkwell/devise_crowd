@@ -57,12 +57,18 @@ module Devise::Strategies
           DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : no User found in DB"
         else
           if resource.valid_password?(password)
-            crowd_username = email
-            if resource.user_token
-              token = resource.upsert_user_token(resource.user_token.token).token
+            token = resource.user_token && resource.user_token.token
+            unless token
+              token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
+              DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{crowd_username} : got token from CROWD #{token}" if token
+            end
+            if token
+              resource.upsert_user_token(token)
             else
               token = resource.upsert_user_token().token
+              DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : generated token : #{token}"
             end
+            crowd_username = email
           else
             DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : password in DB does not match"
           end
