@@ -50,52 +50,43 @@ module Devise::Strategies
     def authenticate_crowd_credentials
       crowd_username = authentication_hash[resource_class.crowd_username_key]
       email = params[@scope][:username] || params[@scope][:email] || crowd_username
-      if email
-        # try to first authenticate against DB password if exists
+
+      # authentication against crowd
+      DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{crowd_username} : in CROWD ..."
+      token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
+
+      if token
         resource = resource_class.find_by_username_or_email(email)
+        # if user does not exist create and update from crowd user
+        unless resource
+          resource = resource_class.new
+          crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(crowd_username) }
+          resource.update_from_crowd_user crowd_user
+          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : created user from CROWD #{crowd_user.inspect}"
+        end
+
+        DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : upsert user token in DB : #{token}"
+        resource.upsert_user_token token
+
+        # if successful update password hash in DB via devise
+        DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : update password in DB"
+        resource.password = password
+        resource.save!
+      end
+
+      if email && !token
+        # authenticate against DB password
+        resource = resource || resource_class.find_by_username_or_email(email)
         unless resource
           DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : no User found in DB"
         else
           if resource.valid_password?(password)
             token = resource.user_token && resource.user_token.token
-            unless token
-              token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
-              DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{crowd_username} : got token from CROWD #{token}" if token
-            end
-            if token
-              resource.upsert_user_token(token)
-            else
-              token = resource.upsert_user_token().token
-              DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : generated token : #{token}"
-            end
+            token = resource.upsert_user_token(token).token
             crowd_username = email
           else
             DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{email} : password in DB does not match"
           end
-        end
-      end
-
-      # if DB authentication not successful try against crowd
-      unless token
-        DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{crowd_username} : in CROWD ..."
-        token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(crowd_username, password) }
-
-        if token
-          # if user does not exist create and update from crowd user
-          unless resource
-            resource = resource_class.new
-            crowd_user = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(crowd_username) }
-            resource.update_from_crowd_user crowd_user
-            DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : created user from CROWD #{crowd_user.inspect}"
-          end
-
-          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : upsert user token in DB : #{token}"
-          resource.upsert_user_token token
-
-          # if successful update password hash in DB via devise
-          DeviseCrowd::Logger.send "DEVISE CREDS AUTH : #{resource.email} : update password in DB"
-          resource.password = password
-          resource.save!
         end
       end
 
