@@ -55,6 +55,7 @@ module Devise::Models
       if @crowd_record.nil?
         @crowd_record = false
         username = self.send(:"#{self.class.crowd_username_key}")
+        Rails.logger.debug "DEVISE CROWD model : crowd_record : find_user_by_name #{username}"
         record = DeviseCrowd.crowd_fetch {crowd_client.find_user_by_name(username)} if username
         @crowd_record = record if record
       end
@@ -151,7 +152,7 @@ module Devise::Models
 
 
     module ClassMethods
-      Devise::Models.config(self, :crowd_enabled, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection, :crowd_auto_register, :add_crowd_records, :update_crowd_records)
+      Devise::Models.config(self, :crowd_enabled, :crowd_noop, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection, :crowd_auto_register, :add_crowd_records, :update_crowd_records, :cookie_domain, :cookie_secure)
 
       def crowd_client
         SimpleCrowd::Client.new({
@@ -159,6 +160,7 @@ module Devise::Models
           :app_name => self.crowd_app_name,
           :app_password => self.crowd_app_password,
           :cache_store => Rails.cache,
+          :noop => self.crowd_noop
         })
       end
 

@@ -13,7 +13,12 @@ module Devise::Strategies
     end
 
     def crowd_record
-      @crowd_record ||= @crowd_username && DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(@crowd_username) }
+      if !@crowd_record && @crowd_username
+        Rails.logger.debug "DEVISE CROWD : crowd_record : find_user_by_name #{@crowd_username}"
+        @crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_name(@crowd_username) }
+      end
+
+      @crowd_record
     end
 
     def crowd_record=(record)
@@ -24,7 +29,13 @@ module Devise::Strategies
     private
 
     def validate_crowd_username!
+      # lookup resource on DB first
       if crowd_username
+        resource = resource_class.find_by_username_or_email(crowd_username)
+      end
+
+      # if resource not found lookup on CROWD
+      if crowd_username && !resource
         resource = resource_class.find_for_crowd_username(crowd_username)
         resource = create_from_crowd if !resource && crowd_auto_register?
       end
@@ -36,7 +47,7 @@ module Devise::Strategies
           fail(:crowd_unverified_request)
         else
           DeviseCrowd::Logger.send("authenticated via #{authenticatable_name}!")
-          sync_from_crowd(resource) if sync_from_crowd?
+          sync_from_crowd(resource) if sync_from_crowd? and update_crowd_records?
           cache_authentication if store?
           yield(resource) if block_given?
           success!(resource)
@@ -66,6 +77,10 @@ module Devise::Strategies
 
     def crowd_auto_register?
       !!resource_class.crowd_auto_register
+    end
+
+    def update_crowd_records?
+      !!resource_class.update_crowd_records
     end
 
     def crowd_client

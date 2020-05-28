@@ -7,6 +7,9 @@ module Devise
   mattr_accessor :crowd_service_url
   @@crowd_service_url = "http://localhost:8095/crowd"
 
+  mattr_accessor :crowd_noop
+  @@crowd_noop = false
+
   mattr_accessor :crowd_app_name
   @@crowd_app_name = "crowd"
 
@@ -32,6 +35,12 @@ module Devise
 
   mattr_accessor :crowd_auto_register
   @@crowd_auto_register = true
+
+  mattr_accessor :cookie_domain
+  @@cookie_domain = nil
+
+  mattr_accessor :cookie_secure
+  @@cookie_secure = nil
 
   mattr_accessor :add_crowd_records
   @@add_crowd_records = false

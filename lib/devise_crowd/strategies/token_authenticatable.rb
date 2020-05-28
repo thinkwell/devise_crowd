@@ -71,14 +71,43 @@ module Devise::Strategies
     def authenticate_crowd_token
       self.crowd_record = nil
       if has_crowd_token?
-        if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
-          crowd_session = DeviseCrowd.session(warden, scope)
-          if crowd_session['crowd.last_token'] == crowd_token && crowd_session['crowd.last_username']
-            self.crowd_username = crowd_session['crowd.last_username']
+        # try to first authenticate against DB token if exists
+        resource = resource_class.find_by_token(crowd_token)
+        if resource
+          resource.upsert_user_token(crowd_token)
+          self.crowd_username = resource.send(resource_class.crowd_username_key)
+        end
+
+        unless self.crowd_username
+          if DeviseCrowd.crowd_fetch { crowd_client.is_valid_user_token?(crowd_token) }
+            DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{crowd_token} : is valid in CROWD"
+            crowd_session = DeviseCrowd.session(warden, scope)
+            if crowd_session['crowd.last_token'] == crowd_token && crowd_session['crowd.last_username']
+              self.crowd_username = crowd_session['crowd.last_username']
+            else
+              self.crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_token(crowd_token) }
+              if self.crowd_record
+                DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{crowd_token} : found user by token in CROWD : #{self.crowd_username}"
+                resource = resource_class.find_by_username(self.crowd_username)
+                # if user does not exist create and update from crowd user
+                unless resource
+                  resource = resource_class.new
+                  resource.update_from_crowd_user self.crowd_record
+                  resource.save!
+                  DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{self.crowd_username} : created user #{resource.id} from CROWD"
+                end
+
+                # if successful update user token in DB
+                DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{self.crowd_username} : update user token in DB"
+                resource.upsert_user_token(crowd_token)
+              else
+                DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{crowd_token} : no user found by token in CROWD"
+              end
+            end
+            DeviseCrowd::Logger.send("cannot find user for token key") unless self.crowd_username
           else
-            self.crowd_record = DeviseCrowd.crowd_fetch { crowd_client.find_user_by_token(crowd_token) }
+            DeviseCrowd::Logger.send "DEVISE TOKEN AUTH : #{crowd_token} : NOT valid in CROWD"
           end
-          DeviseCrowd::Logger.send("cannot find user for token key") unless self.crowd_username
         end
       end
     end
