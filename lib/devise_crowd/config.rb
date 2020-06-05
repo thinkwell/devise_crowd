@@ -22,7 +22,7 @@ module Devise
   # The name of the crowd username parameter/field.  If nil (default), the
   # first authentication_keys key will be used (e.g. email).
   mattr_accessor :crowd_username_key
-  @@crowd_username_key = nil
+  @@crowd_username_key = "crowd_username"
 
   mattr_accessor :crowd_logger
   @@crowd_logger = true
