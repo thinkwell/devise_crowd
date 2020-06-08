@@ -48,7 +48,7 @@ module Devise::Strategies
     end
 
     def authenticate_crowd_credentials
-      username = authentication_hash[resource_class.crowd_username_key]
+      username = authentication_hash.with_indifferent_access[resource_class.crowd_username_key]
       token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) } if username
 
       if token
