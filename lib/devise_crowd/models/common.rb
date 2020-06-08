@@ -42,7 +42,7 @@ module Devise::Models
     end
 
     def needs_crowd_auth?(last_auth)
-      last_auth && last_auth <= self.class.crowd_auth_every.ago
+      last_auth && last_auth <= self.class.crowd_auth_every.seconds.ago
     end
 
     def next_crowd_auth(last_auth)
