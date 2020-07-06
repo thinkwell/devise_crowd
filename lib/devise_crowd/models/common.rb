@@ -42,7 +42,7 @@ module Devise::Models
     end
 
     def needs_crowd_auth?(last_auth)
-      last_auth && last_auth <= self.class.crowd_auth_every.ago
+      last_auth && last_auth <= self.class.crowd_auth_every.seconds.ago
     end
 
     def next_crowd_auth(last_auth)
@@ -150,8 +150,19 @@ module Devise::Models
     private :do_sync_to_crowd
 
 
+    module CrowdUsernameKeyWithDefault
+      def default
+        key = super
+        unless key
+          key = (authentication_keys.is_a?(Hash) ? authentication_keys.keys : authentication_keys).first
+        end
+        key
+      end
+    end
 
     module ClassMethods
+      prepend CrowdUsernameKeyWithDefault
+
       Devise::Models.config(self, :crowd_enabled, :crowd_noop, :crowd_service_url, :crowd_app_name, :crowd_app_password, :crowd_token_key, :crowd_username_key, :crowd_auth_every, :crowd_allow_forgery_protection, :crowd_auto_register, :add_crowd_records, :update_crowd_records, :cookie_domain, :cookie_secure)
 
       def crowd_client
@@ -171,15 +182,6 @@ module Devise::Models
           crowd_enabled
         end
       end
-
-      def crowd_username_key_with_default
-        key = crowd_username_key_without_default
-        unless key
-          key = (authentication_keys.is_a?(Hash) ? authentication_keys.keys : authentication_keys).first
-        end
-        key
-      end
-      alias_method_chain :crowd_username_key, :default
 
       def find_for_crowd_username(username)
         find_for_authentication({self.crowd_username_key => username})

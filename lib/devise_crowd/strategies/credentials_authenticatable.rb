@@ -48,6 +48,7 @@ module Devise::Strategies
     end
 
     def authenticate_crowd_credentials
+<<<<<<< HEAD
       crowd_username = authentication_hash[resource_class.crowd_username_key]
       email = params[@scope][:username] || params[@scope][:email] || crowd_username
 
@@ -89,6 +90,10 @@ module Devise::Strategies
           end
         end
       end
+=======
+      username = authentication_hash.with_indifferent_access[resource_class.crowd_username_key]
+      token = DeviseCrowd.crowd_fetch { crowd_client.authenticate_user(username, password) } if username
+>>>>>>> do-yolk-heroku-upgrade
 
       if token
         self.crowd_token = token
